@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spring.plus.context.annotation.Debounce;
 import org.spring.plus.core.RespStatusConstants;
+import org.spring.plus.web.http.HttpResp;
 import org.spring.plus.web.servlet.mvc.method.annotation.HttpStandardResponse;
 import org.spring.plus.web.servlet.mvc.method.annotation.OperationLog;
 import org.spring.plus.web.socket.WebsocketSessionManager;
@@ -47,10 +48,10 @@ public class ClientDemoController {
     @Operation(description = "测试校验get")
     @OperationLog
     @GetMapping("/test/get")
-    public Object testGetValidation(@Validated TestDto testDto) {
+    public HttpResp<TestDto> testGetValidation(@Validated TestDto testDto) {
         Locale locale = LocaleContextHolder.getLocale();
         testDto.setMessage(messageSource.getMessage(RespStatusConstants.NOT_FOUND.getCode(), null, locale));
-        return testDto;
+        return new HttpResp<>(testDto, RespStatusConstants.OK);
     }
 
 
