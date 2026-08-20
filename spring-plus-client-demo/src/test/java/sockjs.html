@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>SockJS 连接测试</title>
+    <!-- 引入 SockJS 客户端库 -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1e1e2e; color: #cdd6f4; padding: 20px; }
+        h1 { font-size: 1.4rem; margin-bottom: 16px; color: #89b4fa; }
+        .panel { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+        input, button { padding: 8px 14px; border-radius: 6px; border: 1px solid #45475a; font-size: 14px; }
+        input { background: #313244; color: #cdd6f4; flex: 1; min-width: 260px; }
+        button { cursor: pointer; border: none; font-weight: 600; transition: opacity .2s; }
+        button:hover { opacity: .85; }
+        .btn-connect { background: #a6e3a1; color: #1e1e2e; }
+        .btn-disconnect { background: #f38ba8; color: #1e1e2e; }
+        .btn-send { background: #89b4fa; color: #1e1e2e; }
+        .btn-clear { background: #6c7086; color: #cdd6f4; }
+        .status { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-block; margin-bottom: 12px; }
+        .status.disconnected { background: #f38ba8; color: #1e1e2e; }
+        .status.connected { background: #a6e3a1; color: #1e1e2e; }
+        .status.connecting { background: #fab387; color: #1e1e2e; }
+        #log {
+            background: #181825; border: 1px solid #313244; border-radius: 8px;
+            height: 420px; overflow-y: auto; padding: 12px; font-family: 'Fira Code', monospace;
+            font-size: 13px; line-height: 1.7; white-space: pre-wrap; word-break: break-all;
+        }
+        .log-time { color: #6c7086; margin-right: 8px; }
+        .log-info { color: #89b4fa; }
+        .log-success { color: #a6e3a1; }
+        .log-error { color: #f38ba8; }
+        .log-heartbeat { color: #6c7086; font-style: italic; }
+        .log-send { color: #fab387; }
+        .send-row { display: flex; gap: 8px; margin-top: 12px; }
+        .send-row input { flex: 1; }
+    </style>
+</head>
+<body>
+
+<h1>🔌 SockJS 连接测试</h1>
+
+<div class="panel">
+    <input id="url" type="text" value="http://localhost:8080/public/sockjs" placeholder="SockJS 端点地址">
+    <button class="btn-connect" onclick="connect()">连接</button>
+    <button class="btn-disconnect" onclick="disconnect()">断开</button>
+</div>
+
+<div id="statusBar" class="status disconnected">● 未连接</div>
+
+<div class="send-row">
+    <input id="msgInput" type="text" placeholder="输入要发送的消息..." onkeydown="if(event.key==='Enter') sendMessage()">
+    <button class="btn-send" onclick="sendMessage()">发送</button>
+    <button class="btn-clear" onclick="clearLog()">清空日志</button>
+</div>
+
+<div id="log"></div>
+
+<script>
+    let sock = null;
+    let heartbeatCount = 0;
+    let heartbeatTimer = null;
+
+    // ========== 日志工具 ==========
+    function log(msg, type = 'info') {
+        const el = document.getElementById('log');
+        const time = new Date().toLocaleTimeString('zh-CN', { hour12: false, fractionalSecondDigits: 3 });
+        const span = document.createElement('div');
+        span.innerHTML = `<span class="log-time">[${time}]</span><span class="log-${type}">${escapeHtml(msg)}</span>`;
+        el.appendChild(span);
+        el.scrollTop = el.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function setStatus(state) {
+        const bar = document.getElementById('statusBar');
+        bar.className = 'status ' + state;
+        const labels = { connected: '● 已连接', disconnected: '● 未连接', connecting: '● 连接中...' };
+        bar.textContent = labels[state] || state;
+    }
+
+    // ========== 核心操作 ==========
+    function connect() {
+        if (sock) {
+            log('已有活跃连接，请先断开', 'error');
+            return;
+        }
+        const url = document.getElementById('url').value.trim();
+        if (!url) { log('请输入 SockJS 端点地址', 'error'); return; }
+
+        setStatus('connecting');
+        log(`正在连接: ${url}`, 'info');
+        heartbeatCount = 0;
+
+        sock = new SockJS(url);
+
+        sock.onopen = function () {
+            setStatus('connected');
+            log('✅ 连接建立成功', 'success');
+            log(`传输协议: ${sock.protocol || 'unknown'}`, 'info');
+        };
+
+        sock.onmessage = function (e) {
+            console.log(e)
+            const data = e.data;
+            // SockJS 心跳帧为 "h"
+            if (data === 'h') {
+                heartbeatCount++;
+                // 每 10 次心跳打印一次，避免刷屏
+                if (heartbeatCount % 10 === 1) {
+                    log(`💓 心跳 #${heartbeatCount}`, 'heartbeat');
+                }
+                return;
+            }
+            log(`📥 收到消息: ${data}`, 'success');
+        };
+
+        sock.onerror = function (e) {
+            log('❌ 连接错误: ' + (e?.message || JSON.stringify(e)), 'error');
+        };
+
+        sock.onclose = function (e) {
+            setStatus('disconnected');
+            log(`🔒 连接关闭 | code=${e.code} reason="${e.reason || ''}" wasClean=${e.wasClean}`, 'error');
+            sock = null;
+            stopHeartbeatWatch();
+        };
+
+        // 心跳监控：如果 30s 没收到任何消息（含心跳），提示可能断线
+        startHeartbeatWatch();
+    }
+
+    function disconnect() {
+        if (!sock) { log('当前没有活跃连接', 'error'); return; }
+        log('主动断开连接...', 'info');
+        sock.close();
+        sock = null;
+        stopHeartbeatWatch();
+    }
+
+    function sendMessage() {
+        if (!sock || sock.readyState !== SockJS.OPEN) {
+            log('未连接，无法发送', 'error');
+            return;
+        }
+        const input = document.getElementById('msgInput');
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        sock.send(msg);
+        log(`📤 已发送: ${msg}`, 'send');
+        input.value = '';
+    }
+
+    function clearLog() {
+        document.getElementById('log').innerHTML = '';
+        heartbeatCount = 0;
+    }
+
+    // ========== 心跳监控 ==========
+    function startHeartbeatWatch() {
+        stopHeartbeatWatch();
+        let lastCount = 0;
+        heartbeatTimer = setInterval(() => {
+            if (heartbeatCount === lastCount && sock && sock.readyState === SockJS.OPEN) {
+                log('⚠️ 30s 内未收到心跳，连接可能已断开', 'error');
+            }
+            lastCount = heartbeatCount;
+        }, 30000);
+    }
+
+    function stopHeartbeatWatch() {
+        if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+    }
+</script>
+
+</body>
+</html>

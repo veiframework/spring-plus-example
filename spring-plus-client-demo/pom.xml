@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.hallway</groupId>
+        <artifactId>spring-plus-boot-starter</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>spring-plus-client-demo</artifactId>
+
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-swagger</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-cache-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-caffeine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-poi-utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-trace</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-logger</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-websocket</artifactId>
+        </dependency>
+    </dependencies>
+
+
+</project>

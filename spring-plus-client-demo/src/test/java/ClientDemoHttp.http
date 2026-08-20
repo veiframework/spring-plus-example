@@ -1,0 +1,29 @@
+
+
+
+### testPost
+POST http://localhost:8080/test/post
+content-type: application/json
+X-Locale: en
+
+{
+  "name": "213",
+  "date": "2026-07-01 01:00:00",
+  "localDate": "2026-07-01",
+  "localDateTime": "2026-07-01 01:00:00",
+  "localTime": "01:00:00",
+  "yearMonth": "2026-07",
+  "year": "2026",
+  "bigDecimal": 0.02
+}
+
+### testGet
+GET http://localhost:8080/test/get?name=213&date=2026-07-01 01:00:00&localDate=2026-07-01&localDateTime=2026-07-01 01:00:00&localTime=01:00:00&yearMonth=2026-07&year=2026&bigDecimal=0.02
+content-type: application/json
+
+
+### testSendWs
+POST http://localhost:8080/test/ws/msg/127.0.0.1
+
+### Websocket 连接
+WEBSOCKET ws://localhost:8080/public/ws

@@ -1,0 +1,20 @@
+spring:
+  redis:
+    password: lumeng@8888
+  application:
+    name: spring-plus-client-demo
+  plus:
+    swagger:
+      enabled: true
+    logging:
+      enable-http: true
+      enable-websocket: true
+    web:
+      max-age: 3600
+    websocket:
+      standard:
+        enabled: true
+      sockjs:
+        enabled: true
+    cache:
+      type: redis
