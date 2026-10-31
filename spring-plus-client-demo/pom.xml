@@ -53,6 +53,18 @@
             <groupId>org.hallway</groupId>
             <artifactId>spring-plus-websocket</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-rocketmq</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hallway</groupId>
+            <artifactId>spring-plus-rabbitmq</artifactId>
+        </dependency>
     </dependencies>
 
 
